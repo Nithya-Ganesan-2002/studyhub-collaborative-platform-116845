@@ -129,6 +129,22 @@ GRANT CREATE ON SCHEMA public TO ${DB_USER};
 \dn+ public
 EOF
 
+# ----- APPLY THE SCHEMA -----
+SCHEMA_FILE="schema.sql"
+if [ -f "$SCHEMA_FILE" ]; then
+    echo "Applying schema from $SCHEMA_FILE to database ${DB_NAME}..."
+    sudo -u postgres ${PG_BIN}/psql -p ${DB_PORT} -d ${DB_NAME} -f "$SCHEMA_FILE"
+    if [ $? -eq 0 ]; then
+        echo "✓ Schema applied successfully!"
+    else
+        echo "✗ Failed to apply schema. See error above."
+        exit 1
+    fi
+else
+    echo "Warning: $SCHEMA_FILE not found. Tables will NOT be created!"
+fi
+# ----- END SCHEMA APPLY -----
+
 # Save connection command to a file
 echo "psql postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}" > db_connection.txt
 echo "Connection string saved to db_connection.txt"
